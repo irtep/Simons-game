@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+			<!-- Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Anton|Audiowide" rel="stylesheet">
+
+			<!-- Font Awesome-->
+
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+				<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+		<!-- jQuery library -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+		<!-- Latest compiled JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+		<title>Speli</title>
+
+		<style>
+			
+            body {
+				background-color: white; 
+			}
+            
+			#mainSection {
+                
+				position: relative;
+				
+				top: 50px;
+				width: 500px;
+				height: 400px;
+				border-radius: 5px;
+				background-color: black;
+				background: linear-gradient(black, #101010); /* Standard syntax (must be last) */
+				padding: 30px;
+				font-family: 'Audiowide', cursive;
+				font-size: 25px;
+				color: white;
+			}
+            
+            .pushThis {
+                
+				text-shadow: 2px 2px;
+				font-size: 80px;                
+                
+            }
+            
+            #yellowo {
+                
+                color: rgb(100,100,0);
+                
+            }
+            
+            #redo {
+                
+                color: rgb(180,0,0);
+                
+            }
+            #greeno {
+                
+                color: green;
+                
+            }
+            #blueo {
+                
+                color: rgb(0,0,255);
+                
+            }
+            
+            .selectors {
+                
+                background-color: black;
+                border-color: black;
+                
+            }
+            
+            .cyanFont {
+                
+                color: cyan;
+                
+            }
+            
+            .pushers {
+                
+                background-color: black;
+                border-color: black;
+                
+            }
+            
+            button:focus {
+                
+                outline:0;
+            
+            }          
+            
+            #infoBox {
+                
+                color: black;
+                
+            }
+
+		</style>
+
+	</head>
+
+	<body>
+
+		<div id="mainSection" class ="container-fluid">
+
+            <input class= "selectors" type= "button" id= "start" value= "start/restart"></input><br>
+            mode: <input class= "selectors" type= "button" id= "easy" value= "easy"></input> /
+            <input class= "selectors cyanFont" type= "button" id= "strick" value= "strick"></input><br>
+			level: <span id="levelNumber"></span> <br>
+			<p id= "infoBox">placeholder</p>
+            <br><br><center>
+            <button id= "yellowox" class= "pushers">    
+            <i class= "fa fa-circle pushThis" id= "yellowo"></i> </button>
+            <button id= "redox" class= "pushers">
+            <i class= "fa fa-circle pushThis" id= "redo"></i> </button>
+            <button id= "blueox" class= "pushers">
+            <i class= "fa fa-circle pushThis" id= "blueo"></i> </button>
+            <button id= "greenox" class= "pushers">
+            <i class= "fa fa-circle pushThis" id= "greeno"></i> </button>
+			
+			</center>	
+
+
+		</div> <!-- FLUID CONTAINER ENDS-->	
+
+	</body>
+
+	<script>
+        
+        // global vars:
+        let strickMode = true;
+        let levelAtm = 1;
+        var gameSequence = []; // moves will come here
+        let xx = 0; // this calculates timer uses
+        var timerBody; // timers go here
+        let counter = 0; // where user is clicking atm.
+        // nicknames:
+        const infoboxi = document.getElementById("infoBox");
+        
+        /*
+        
+                Functions that execute things in game.
+        
+        */
+        
+        function resetAll() {
+            
+            levelAtm = 1;
+            xx = 0;
+            stopTimeout();
+            StopInterval();
+            counter = 0;
+            gameSequence = [];
+          
+        }
+	
+        
+        function gameOver(whyThisHappened) { // too slow react.
+            
+            if (strickMode === true) { // if mode is strick, its game over
+            
+                if (whyThisHappened == "time") {
+
+                    infoboxi.innerHTML = "Time is up. You reached level: "+ levelAtm;
+
+                } // too slow ends
+
+                else {
+
+                    infoboxi.innerHTML = "Wrong. You reached level: "+ levelAtm;   
+
+                } // wrong button ends
+
+                resetAll();
+                
+            } else {  // if mode is not strick. Can continue.
+                
+                infoboxi.innerHTML = "Wrong button. Try again."
+                
+                showSequence();
+                
+            } // easy mode ends.
+            
+        } // game over ends
+        
+        function declareVictory() {
+            
+            infoboxi.innerHTML = "Congratulations! You are the Champion!"
+            
+            resetAll();
+            
+        } // declare victory ends
+        
+        // flashers
+        function flashYellow() {
+            
+                     // change color and change it back.
+                    document.getElementById("yellowo").style.color = "yellow";
+            
+                    new Audio('https://s3.amazonaws.com/freecodecamp/simonSound1.mp3').play();
+                    
+                    setTimeout(() => {
+                        
+                        document.getElementById("yellowo").style.color = "rgb(100,100,0)";
+                        
+                    }, 250)             
+        }
+
+        function flashBlue() {
+            
+                     // change color and change it back.
+                    document.getElementById("blueo").style.color = "rgb(0,170,255)";
+            
+                    new Audio('https://s3.amazonaws.com/freecodecamp/simonSound2.mp3').play();
+                    
+                    setTimeout(() => {
+                        
+                        document.getElementById("blueo").style.color = "rgb(0,0,255)";
+                        
+                    }, 250)               
+            
+        }
+
+        function flashGreen() {
+            
+                    // change color and change it back.
+                    document.getElementById("greeno").style.color = "rgb(0,255,0)";
+            
+                    new Audio('https://s3.amazonaws.com/freecodecamp/simonSound3.mp3').play();
+                    
+                    setTimeout(() => {
+                        
+                        document.getElementById("greeno").style.color = "green";
+                        
+                    }, 250)            
+        }
+
+        function flashRed() {
+ 
+                    // change color and change it back.
+                    document.getElementById("redo").style.color = "rgb(255,0,0)";
+            
+                    new Audio('https://s3.amazonaws.com/freecodecamp/simonSound4.mp3').play();
+                    
+                    setTimeout(() => {
+                        
+                        document.getElementById("redo").style.color = "rgb(180,0,0)";
+                        
+                    }, 250)            
+            
+        }   // flashers end     
+ 
+ 		function StopInterval() {
+		
+            clearInterval(timerBody);
+            
+		}      // timer stopper ends
+        
+        function stopTimeout() {
+            
+            clearTimeout(timerBody);
+            
+        } // time stopper ends
+        
+        function myTimer() { // this rolls the array and performs actions
+            
+            let reseted = false;
+            
+            switch (gameSequence[xx]) {
+                    
+                case "red":
+                    
+                    flashRed();
+                    
+                break;
+                    
+                case "green":
+ 
+                    flashGreen();
+                    
+                break;
+                    
+                case "blue":
+                    
+                    flashBlue();
+                    
+                break;
+                    
+                case "yellow":
+                    
+                   flashYellow();
+                    
+                break;
+                    
+                default: console.log("gameSequence xx not found: ", xx);    
+                    
+            } // switch ends
+		 
+            if (xx >= gameSequence.length) {
+		 
+                // if array is shown, lets stop the timer
+			     StopInterval();
+                 xx = 0;
+                
+                // player needs to now start clicking:
+                infoboxi.style.color = "white";
+                infoboxi.innerHTML = "go! time is running."
+                
+                reseted = true;
+
+                startTimeOut(); // countdown for player starts
+                
+		   }
+		 
+            if (reseted === false) { // if we reseted, lets not add++
+            
+		      xx++;
+                
+            } // if ends   
+
+		} // my timer ends
+        
+		
+        function startTimeOut() {
+            
+            timerBody = setTimeout(() => {
+                        
+            gameOver("time");
+                        
+            }, 3000) 
+            
+        } // start time out ends
+        
+		function showSequence() { // set timer to show the sequence
+        
+            timerBody = setInterval(function(){ myTimer() }, 1000);
+               
+        } // show sequence ends
+        
+        function randomizeNext(){
+            
+            let d4dice = 1 + Math.floor(Math.random() * 4);
+            console.log("diceResult: ", d4dice);
+
+            switch (d4dice) {
+                    
+                case 1:
+                    
+                    gameSequence.push("red");
+                    
+                break;
+                    
+                case 2:
+
+                    gameSequence.push("yellow");
+
+                break;
+                    
+                case 3:
+
+                    gameSequence.push("blue");
+                    
+                break;
+                    
+                case 4:
+                    
+                    gameSequence.push("green");
+            
+                break;
+                    
+                default: console.log("diceresult not found in switch: ", d4dice);    
+                    
+            }       // switch ends 
+            
+            console.log("after push: ", gameSequence);
+            
+        } // randomizer ends
+        
+        function gameRound(){
+            
+            console.log("gameRound start");
+            
+            randomizeNext();
+            
+            showSequence(); // launch show sequence
+            
+        }// gameRound ends
+        
+        function startGame(){
+            
+            resetAll();
+            
+            gameRound();
+            
+        }
+        
+        function levelUpFunc(){ // levels up:
+            
+            infoboxi.innerHTML = "level advanced.";
+            
+            if (levelAtm === 20) { // if you are victorious
+                
+                declareVictory();
+                
+            }
+            
+            counter = 0;
+                            
+            levelAtm++;
+            
+            document.getElementById("levelNumber").innerHTML = levelAtm;
+                            
+            gameRound();            
+            
+        } // levelup func ends
+        
+        function buttonAction(butID) { // activates for all buttons
+                    
+            let forLevel = levelAtm; // make something to compare.
+            
+            console.log("butID, counter, forLevel: ", butID, counter, forLevel);
+            
+            switch (butID) {
+                    
+                case "start":
+                    
+                    document.getElementById("levelNumber").innerHTML = levelAtm;
+                    infoboxi.style.color = "black";
+                    
+                    startGame();
+                    
+                break;
+                    
+                case "strick":
+                    
+                    strickMode = true;
+                    
+                    document.getElementById("strick").style.color = "cyan";
+                    document.getElementById("easy").style.color = "white";
+                    
+                break;
+                    
+                case "easy":
+                    
+                    strickMode = false;
+                    
+                    document.getElementById("strick").style.color = "white";
+                    document.getElementById("easy").style.color = "cyan";
+                    
+                    
+                break;    
+                    
+                case "yellowox":
+                    
+                    flashYellow();
+                    
+                    console.log("needs: ", gameSequence[counter]);
+                        
+                    stopTimeout();                     
+                    
+                    if (gameSequence[counter] == "yellow") {
+                        
+                        console.log("right");
+                        console.log("counter and forLevel: ", counter, forLevel );
+                        counter++;
+
+                        
+                        if (counter == forLevel) {
+                                
+                            levelUpFunc();
+                        
+                        } else if (counter != forLevel) {
+                            
+                            startTimeOut();
+                            
+                        }
+                        
+                    } else { gameOver("wrongButton");}
+                    
+                break;    
+                
+                case "redox":
+                    
+                   flashRed();
+                    
+                    console.log("needs: ", gameSequence[counter]);
+                    console.log("counter and forLevel: ", counter, forLevel );
+                        
+                    stopTimeout(); 
+                    
+                    if (gameSequence[counter] == "red") {
+                        
+                        counter++;
+                        
+                        if (counter == forLevel) {
+                          
+                            levelUpFunc();
+                        
+                        } else if (counter != forLevel) {
+                            
+                            startTimeOut();
+                            
+                        }
+                        
+                    } else { gameOver("wrongButton");}                    
+                    
+                break;    
+                
+                case "blueox":
+                    
+                   flashBlue();
+                    
+                    console.log("needs: ", gameSequence[counter]);
+                    console.log("counter and forLevel: ", counter, forLevel );
+                        
+                    stopTimeout();                     
+                    
+                    if (gameSequence[counter] == "blue") {
+                        
+                        counter++;
+                        
+                        if (counter == forLevel) {
+                            
+                            levelUpFunc();
+                        
+                        } else if (counter != forLevel) {
+                            
+                            startTimeOut();
+                            
+                        }
+                        
+                    } else { gameOver("wrongButton");}                    
+                    
+                break;    
+                
+                case "greenox":
+                    
+                   flashGreen();
+                
+                    console.log("needs: ", gameSequence[counter]);
+                    console.log("counter and forLevel: ", counter, forLevel );
+                        
+                    stopTimeout();                    
+                    
+                    if (gameSequence[counter] === "green") {
+                          
+                        counter++;
+
+                        
+                        if (counter == forLevel) {
+                            
+                            levelUpFunc();
+                        
+                        } else if (counter != forLevel) {
+                            
+                            console.log("not same.. c / fL", counter, forLevel);
+                            
+                            startTimeOut();
+                            
+                        }
+                        
+                    } else { gameOver("wrongButton");}                    
+                    
+                break;    
+                    
+                default: console.log("id not found in switch"); 
+                    
+            } // switch ends
+            
+        } // button action ends
+		
+			 $(document).ready(() => {
+                 
+                    document.getElementById("levelNumber").innerHTML = levelAtm;
+				 	
+					$(":button").click(function (event) {  // event listener for buttons.
+	        		console.log("event listener for button activated");
+	        	
+	        		buttonAction(this.id); // fires timeForAction with id of button clicked.
+	        		});
+                 
+			}) // on load ends
+	</script>
+
+</html>
